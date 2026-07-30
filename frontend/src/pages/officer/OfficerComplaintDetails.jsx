@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { useToast } from '../../components/common/Toast';
 import { Sparkles, MapPin, Mail, Phone, Upload, Send, ArrowLeft, Shield } from 'lucide-react';
 import api from '../../services/api';
+import PageHeader from '../../components/layout/PageHeader';
 import SkeletonLoader from '../../components/common/SkeletonLoader';
 import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
@@ -86,10 +87,10 @@ const OfficerComplaintDetails = () => {
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="max-w-5xl mx-auto space-y-6"
+      className="space-y-6"
     >
       {/* Back Link */}
-      <Link to="/officer/complaints" className="inline-flex items-center gap-2 text-xs font-bold text-slate-500 hover:text-amber-600">
+      <Link to="/officer/complaints" className="inline-flex items-center gap-2 text-xs font-bold text-[#6B7280] hover:text-[#2563EB] transition-colors">
         <ArrowLeft className="w-4 h-4" /> Back to Officer Desk
       </Link>
 
@@ -97,7 +98,7 @@ const OfficerComplaintDetails = () => {
       <Card hoverEffect={false} className="p-6 sm:p-8 space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <span className="text-sm font-extrabold text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/60 px-3 py-1 rounded-xl border border-amber-200 dark:border-amber-800">
+            <span className="text-sm font-extrabold text-amber-700 bg-amber-50 px-3 py-1 rounded-xl border border-amber-200">
               #{complaint.complaint_number}
             </span>
             <Badge variant={complaint.status}>{complaint.status}</Badge>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import api from '../../services/api';
+import PageHeader from '../../components/layout/PageHeader';
 import SkeletonLoader from '../../components/common/SkeletonLoader';
 import Badge from '../../components/ui/Badge';
 import Button from '../../components/ui/Button';
@@ -37,7 +38,7 @@ const AssignedComplaints = () => {
       key: 'complaint_number',
       sortable: true,
       render: (val) => (
-        <span className="font-extrabold text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/60 px-2 py-0.5 rounded-lg border border-amber-200 dark:border-amber-800 text-[11px]">
+        <span className="font-extrabold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-lg border border-amber-200 text-xs">
           #{val}
         </span>
       ),
@@ -48,8 +49,8 @@ const AssignedComplaints = () => {
       sortable: true,
       render: (val, row) => (
         <div>
-          <h4 className="font-bold text-slate-900 dark:text-slate-100 text-xs">{val}</h4>
-          <p className="text-[11px] text-slate-500 dark:text-slate-400">By {row.citizen_name || 'Citizen'} &bull; {row.location || 'Location Not Specified'}</p>
+          <h4 className="font-bold text-[#111827] text-xs">{val}</h4>
+          <p className="text-[11px] text-[#6B7280]">By {row.citizen_name || 'Citizen'} &bull; {row.location || 'Location Not Specified'}</p>
         </div>
       ),
     },
@@ -57,7 +58,7 @@ const AssignedComplaints = () => {
       header: 'Category',
       key: 'category',
       sortable: true,
-      render: (val) => <span className="font-semibold text-slate-700 dark:text-slate-300">{val}</span>,
+      render: (val) => <span className="font-semibold text-slate-700">{val}</span>,
     },
     {
       header: 'Priority',
@@ -120,16 +121,13 @@ const AssignedComplaints = () => {
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="space-y-6 max-w-7xl mx-auto"
+      className="space-y-6"
     >
-      <div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">
-          Assigned Department Desk
-        </h1>
-        <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
-          Manage, inspect, and update field resolution status for assigned civic tickets
-        </p>
-      </div>
+      <PageHeader
+        title="Assigned Department Desk"
+        subtitle="Manage, inspect, and update field resolution status for all your assigned civic tickets."
+        breadcrumbs={[{ label: 'Officer Desk', link: '/officer' }, { label: 'Assigned Complaints' }]}
+      />
 
       {loading ? (
         <SkeletonLoader count={4} type="table" />
