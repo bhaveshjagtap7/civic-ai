@@ -13,32 +13,29 @@ export const FormInput = ({
   disabled = false,
   icon: Icon,
   rows,
-  options, // for select
+  options,
   className = '',
   ...props
 }) => {
   const [showPassword, setShowPassword] = useState(false);
-
   const isPassword = type === 'password';
   const inputType = isPassword ? (showPassword ? 'text' : 'password') : type;
 
-  const baseInputClasses = `w-full px-3.5 py-2.5 bg-white dark:bg-slate-900 border rounded-xl text-sm font-medium text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 transition-all duration-150 focus:outline-none focus:ring-2 disabled:bg-slate-100 dark:disabled:bg-slate-800/60 disabled:cursor-not-allowed ${
-    error
-      ? 'border-red-300 dark:border-red-800 focus:ring-red-500/20 focus:border-red-500'
-      : 'border-slate-200 dark:border-slate-700/80 focus:ring-blue-500/20 focus:border-blue-600 dark:focus:border-blue-500'
-  } ${Icon ? 'pl-10' : ''} ${isPassword ? 'pr-10' : ''}`;
+  const inputClass = `w-full h-9 px-3 border rounded-lg text-sm text-gray-900 placeholder-gray-400 bg-white transition-colors focus:outline-none focus:ring-2 disabled:bg-gray-50 disabled:cursor-not-allowed ${error
+      ? 'border-red-400 focus:ring-red-200 focus:border-red-500'
+      : 'border-gray-200 focus:ring-blue-100 focus:border-blue-500'
+    } ${Icon ? 'pl-9' : ''} ${isPassword ? 'pr-9' : ''}`;
 
   return (
-    <div className={`space-y-1.5 ${className}`}>
+    <div className={`space-y-1 ${className}`}>
       {label && (
-        <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 tracking-wide">
+        <label className="block text-xs font-medium text-gray-700">
           {label} {required && <span className="text-red-500">*</span>}
         </label>
       )}
-
-      <div className="relative rounded-xl">
+      <div className="relative">
         {Icon && (
-          <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+          <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
             <Icon className="w-4 h-4" />
           </div>
         )}
@@ -51,7 +48,8 @@ export const FormInput = ({
             placeholder={placeholder}
             rows={rows || 4}
             disabled={disabled}
-            className={baseInputClasses}
+            className={`w-full px-3 py-2 border rounded-lg text-sm text-gray-900 placeholder-gray-400 bg-white focus:outline-none focus:ring-2 disabled:bg-gray-50 ${error ? 'border-red-400 focus:ring-red-200' : 'border-gray-200 focus:ring-blue-100 focus:border-blue-500'
+              }`}
             {...props}
           />
         ) : type === 'select' ? (
@@ -60,13 +58,11 @@ export const FormInput = ({
             value={value}
             onChange={onChange}
             disabled={disabled}
-            className={baseInputClasses}
+            className={inputClass}
             {...props}
           >
             {options?.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
+              <option key={opt.value} value={opt.value}>{opt.label}</option>
             ))}
           </select>
         ) : (
@@ -77,7 +73,7 @@ export const FormInput = ({
             onChange={onChange}
             placeholder={placeholder}
             disabled={disabled}
-            className={baseInputClasses}
+            className={inputClass}
             {...props}
           />
         )}
@@ -86,14 +82,14 @@ export const FormInput = ({
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
           >
             {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
           </button>
         )}
       </div>
 
-      {error && <p className="text-xs text-red-500 font-medium pl-1">{error}</p>}
+      {error && <p className="text-xs text-red-500">{error}</p>}
     </div>
   );
 };

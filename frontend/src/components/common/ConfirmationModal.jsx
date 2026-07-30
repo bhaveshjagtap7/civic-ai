@@ -52,11 +52,10 @@ const ConfirmationModal = ({
             <button
               onClick={onConfirm}
               disabled={loading}
-              className={`px-4 py-2 text-sm font-medium text-white rounded-xl shadow-md transition-colors flex items-center gap-2 ${
-                isDanger
+              className={`px-4 py-2 text-sm font-medium text-white rounded-xl shadow-md transition-colors flex items-center gap-2 ${isDanger
                   ? 'bg-rose-600 hover:bg-rose-700 dark:bg-rose-600'
                   : 'bg-brand-600 hover:bg-brand-700'
-              }`}
+                }`}
             >
               {loading && <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />}
               {confirmText}

@@ -91,11 +91,10 @@ const AIChatDrawer = ({ isOpen, onClose }) => {
                 )}
 
                 <div
-                  className={`max-w-[80%] p-3.5 rounded-2xl text-sm leading-relaxed ${
-                    m.sender === 'user'
+                  className={`max-w-[80%] p-3.5 rounded-2xl text-sm leading-relaxed ${m.sender === 'user'
                       ? 'bg-brand-600 text-white rounded-br-none shadow-md'
                       : 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 rounded-bl-none border border-slate-200 dark:border-slate-700 shadow-xs'
-                  }`}
+                    }`}
                 >
                   {m.text}
                 </div>
