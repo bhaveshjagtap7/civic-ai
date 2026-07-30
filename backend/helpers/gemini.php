@@ -1,29 +1,46 @@
 <?php
-// backend/helpers/gemini.php
+// backend/helpers/gemini.php - Secure Gemini AI Integration & Resilient Fallback Engine
 
 class GeminiAI {
-    private static $apiKey = "YOUR_GEMINI_API_KEY"; // Loaded dynamically if set in env or db
+    private static function getApiKey() {
+        $envKey = getenv('GEMINI_API_KEY');
+        if ($envKey && $envKey !== 'YOUR_GEMINI_API_KEY') {
+            return $envKey;
+        }
+        if (isset($_ENV['GEMINI_API_KEY']) && $_ENV['GEMINI_API_KEY'] !== 'YOUR_GEMINI_API_KEY') {
+            return $_ENV['GEMINI_API_KEY'];
+        }
+        return null;
+    }
 
-    public static function processComplaint($title, $description) {
-        $promptText = "Analyze the following citizen complaint:\nTitle: {$title}\nDescription: {$description}\n\n" .
+    /**
+     * Process Citizen Complaint with:
+     * 1. Category Classification
+     * 2. Department Detection & Routing
+     * 3. Priority Detection
+     * 4. AI Generated Executive Summary
+     * 5. Duplicate Complaint Detection
+     * 6. Smart Suggested Resolution
+     */
+    public static function processComplaint($title, $description, $location = '', $existingComplaints = []) {
+        // Feature 5: Duplicate Complaint Detection
+        $duplicateInfo = self::checkDuplicate($title, $description, $location, $existingComplaints);
+
+        $promptText = "Analyze the following citizen complaint:\nTitle: {$title}\nDescription: {$description}\nLocation: {$location}\n\n" .
             "Categorize and route this complaint accurately. Return ONLY a valid JSON object with the following schema:\n" .
             "{\n" .
             '  "department": "<One of: Public Works & Roads, Water Supply & Sewerage, Electricity Board, Sanitation & Solid Waste, Stormwater & Drainage, Public Health & Sanitation, Education & Schools, Public Transport & Traffic, Government Services & E-Governance, General & Environmental Services>",' . "\n" .
             '  "category": "<One of: Road, Water, Electricity, Garbage, Drainage, Health, Education, Transport, Government Office, Others>",' . "\n" .
             '  "priority": "<One of: Low, Medium, High, Critical>",' . "\n" .
-            '  "summary": "<1-2 sentence key summary>",' . "\n" .
-            '  "suggested_resolution": "<Actionable field resolution for municipal officers>"' . "\n" .
+            '  "summary": "<1-2 sentence key executive summary>",' . "\n" .
+            '  "suggested_resolution": "<Actionable step-by-step field resolution for municipal officers>"' . "\n" .
             "}";
 
-        // Check if environment GEMINI_API_KEY is present
-        $envKey = getenv('GEMINI_API_KEY');
-        if ($envKey && $envKey !== 'YOUR_GEMINI_API_KEY') {
-            self::$apiKey = $envKey;
-        }
+        $apiKey = self::getApiKey();
 
-        if (self::$apiKey && self::$apiKey !== 'YOUR_GEMINI_API_KEY') {
-            $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" . self::$apiKey;
-            
+        if ($apiKey) {
+            $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" . $apiKey;
+
             $payload = [
                 "contents" => [
                     [
@@ -42,7 +59,7 @@ class GeminiAI {
             curl_setopt($ch, CURLOPT_POST, true);
             curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
             curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
-            curl_setopt($ch, CURLOPT_TIMEOUT, 8);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 6);
 
             $response = curl_exec($ch);
             $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -54,17 +71,57 @@ class GeminiAI {
                     $jsonText = trim($result['candidates'][0]['content']['parts'][0]['text']);
                     $parsed = json_decode($jsonText, true);
                     if ($parsed && isset($parsed['category']) && isset($parsed['priority'])) {
-                        return self::enrichWithDeptId($parsed);
+                        $enriched = self::enrichWithDeptId($parsed);
+                        $enriched['is_duplicate'] = $duplicateInfo['is_duplicate'];
+                        $enriched['duplicate_of'] = $duplicateInfo['duplicate_of'];
+                        return $enriched;
                     }
                 }
             }
         }
 
-        // Rule-based Fallback AI Classifier
-        return self::fallbackClassifier($title, $description);
+        // Graceful Rule-Based NLP Fallback if API key is not set or network request fails
+        $fallback = self::fallbackClassifier($title, $description);
+        $fallback['is_duplicate'] = $duplicateInfo['is_duplicate'];
+        $fallback['duplicate_of'] = $duplicateInfo['duplicate_of'];
+        return $fallback;
     }
 
-    // Smart Fallback Classifier based on NLP keywords
+    /**
+     * Feature 5: Duplicate Complaint Detection Algorithm
+     */
+    public static function checkDuplicate($title, $description, $location, $existingComplaints = []) {
+        if (empty($existingComplaints)) {
+            return ['is_duplicate' => false, 'duplicate_of' => null];
+        }
+
+        $inputTitleLower = strtolower($title);
+        $inputLocLower = strtolower($location);
+
+        foreach ($existingComplaints as $cmp) {
+            $cmpTitleLower = strtolower($cmp['title']);
+            $cmpLocLower = strtolower($cmp['location'] ?? '');
+
+            // Title string similarity percentage
+            similar_text($inputTitleLower, $cmpTitleLower, $titlePercent);
+
+            if ($titlePercent > 60 || ($inputLocLower !== '' && $inputLocLower === $cmpLocLower && $titlePercent > 35)) {
+                return [
+                    'is_duplicate' => true,
+                    'duplicate_of' => [
+                        'id' => $cmp['id'],
+                        'complaint_number' => $cmp['complaint_number'],
+                        'title' => $cmp['title'],
+                        'status' => $cmp['status']
+                    ]
+                ];
+            }
+        }
+
+        return ['is_duplicate' => false, 'duplicate_of' => null];
+    }
+
+    // Smart Fallback Classifier based on NLP keywords & domain rules
     private static function fallbackClassifier($title, $description) {
         $text = strtolower($title . " " . $description);
 
@@ -122,7 +179,7 @@ class GeminiAI {
         }
 
         // Summary generation
-        $summary = "Issue regarding " . strtolower($category) . ": " . (strlen($title) > 60 ? substr($title, 0, 57) . '...' : $title);
+        $summary = "Issue regarding " . strtolower($category) . ": " . (strlen($title) > 65 ? substr($title, 0, 62) . '...' : $title);
 
         // Suggested resolution
         $resolutions = [
@@ -167,8 +224,57 @@ class GeminiAI {
         return $parsed;
     }
 
-    // AI Citizen Assistant Assistant Chatbot response generator
+    /**
+     * Feature 7: AI Chat Assistant Engine (Secure Gemini Calling with Resilient Conversational Logic)
+     */
     public static function generateChatResponse($userMessage, $contextComplaints = []) {
+        $apiKey = self::getApiKey();
+
+        if ($apiKey) {
+            $contextText = "";
+            if (!empty($contextComplaints)) {
+                $contextText = "User's Complaints Context:\n";
+                foreach (array_slice($contextComplaints, 0, 3) as $c) {
+                    $contextText .= "- Ticket #" . ($c['complaint_number'] ?? 'N/A') . ": " . ($c['title'] ?? '') . " | Status: " . ($c['status'] ?? '') . " | Dept: " . ($c['department_name'] ?? '') . "\n";
+                }
+            }
+
+            $prompt = "You are CivicAI Copilot, an official intelligent AI assistant for municipal governance.\n" .
+                "Answer citizen and officer questions helpfully, professionally, and concisely (2-3 sentences max).\n\n" .
+                $contextText . "\nUser Message: " . $userMessage;
+
+            $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" . $apiKey;
+
+            $payload = [
+                "contents" => [
+                    [
+                        "parts" => [
+                            ["text" => $prompt]
+                        ]
+                    ]
+                ]
+            ];
+
+            $ch = curl_init($url);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+            curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 6);
+
+            $response = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
+
+            if ($httpCode === 200 && $response) {
+                $result = json_decode($response, true);
+                if (isset($result['candidates'][0]['content']['parts'][0]['text'])) {
+                    return trim($result['candidates'][0]['content']['parts'][0]['text']);
+                }
+            }
+        }
+
+        // Resilient Chat Fallback
         $msgLower = strtolower($userMessage);
 
         if (strpos($msgLower, 'status') !== false || strpos($msgLower, 'track') !== false || strpos($msgLower, 'update') !== false) {
@@ -187,6 +293,6 @@ class GeminiAI {
             return "If this is a life-threatening emergency or immediate hazard, please call municipal emergency response at **1800-CIVIC-911** alongside filing your Critical priority ticket.";
         }
 
-        return "I am your CivicAI Assistant! I can help you lodge complaints, track their status, find municipal department guidelines, or explain our AI automated routing process. How may I assist you today?";
+        return "I am your CivicAI Assistant! I can help you lodge complaints, track status updates, find municipal department guidelines, or explain our AI automated routing process. How may I assist you today?";
     }
 }

@@ -40,13 +40,20 @@ class ComplaintController {
             Response::error("Complaint title and description are required.", 400);
         }
 
+        // Query open complaints for duplicate detection
+        $stmtOpen = $this->db->query("SELECT id, complaint_number, title, location, category, status FROM complaints WHERE status IN ('Submitted', 'Assigned', 'In Progress') ORDER BY created_at DESC LIMIT 50");
+        $openComplaints = $stmtOpen->fetchAll();
+
         // Process complaint text via Gemini AI Integration
-        $aiAnalysis = GeminiAI::processComplaint($title, $description);
+        $aiAnalysis = GeminiAI::processComplaint($title, $description, $location, $openComplaints);
 
         $category = $aiAnalysis['category'];
         $priority = $aiAnalysis['priority'];
         $deptId = $aiAnalysis['department_id'];
         $aiSummary = $aiAnalysis['summary'];
+        if (!empty($aiAnalysis['is_duplicate']) && !empty($aiAnalysis['duplicate_of'])) {
+            $aiSummary = "[Potential Duplicate of #" . $aiAnalysis['duplicate_of']['complaint_number'] . "] " . $aiSummary;
+        }
         $aiSuggestedResolution = $aiAnalysis['suggested_resolution'];
 
         // Generate unique complaint number
