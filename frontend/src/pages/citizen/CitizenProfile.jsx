@@ -3,6 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../components/common/Toast';
 import { User, Mail, Phone, MapPin, Save } from 'lucide-react';
 import api from '../../services/api';
+import PageHeader from '../../components/layout/PageHeader';
 import Card from '../../components/ui/Card';
 import FormInput from '../../components/ui/FormInput';
 import Button from '../../components/ui/Button';
@@ -39,27 +40,24 @@ const CitizenProfile = () => {
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="max-w-2xl mx-auto space-y-6"
+      className="space-y-6"
     >
-      <div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">
-          User Profile
-        </h1>
-        <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
-          Manage your personal information and civic contact preferences
-        </p>
-      </div>
+      <PageHeader
+        title="My Profile"
+        subtitle="Manage your personal information and civic contact preferences."
+        breadcrumbs={[{ label: 'Profile' }]}
+      />
 
       <Card hoverEffect={false} className="p-6 sm:p-8 space-y-6">
         
         {/* User Card Header */}
-        <div className="flex items-center gap-4 pb-6 border-b border-slate-100 dark:border-slate-800">
+        <div className="flex items-center gap-4 pb-6 border-b border-[#E5E7EB]">
           <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white font-extrabold text-2xl flex items-center justify-center shadow-lg shadow-blue-500/20">
             {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
           </div>
           <div>
-            <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100">{user?.name}</h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400">{user?.email}</p>
+            <h3 className="text-xl font-bold text-[#111827]">{user?.name}</h3>
+            <p className="text-xs text-[#6B7280]">{user?.email}</p>
             <Badge variant={user?.role} className="mt-1.5">
               Role: {user?.role}
             </Badge>

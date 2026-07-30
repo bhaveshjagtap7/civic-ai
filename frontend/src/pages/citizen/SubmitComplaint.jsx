@@ -3,8 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { useToast } from '../../components/common/Toast';
 import VoiceInputButton from '../../components/common/VoiceInputButton';
 import LocationPicker from '../../components/common/LocationPicker';
-import { Sparkles, Upload, X, Send, ShieldCheck, Building2 } from 'lucide-react';
+import { Sparkles, Upload, X, Send, ShieldCheck, Building2, Image as ImageIcon } from 'lucide-react';
 import api from '../../services/api';
+import PageHeader from '../../components/layout/PageHeader';
 import Card from '../../components/ui/Card';
 import FormInput from '../../components/ui/FormInput';
 import Button from '../../components/ui/Button';
@@ -19,6 +20,7 @@ const SubmitComplaint = () => {
   const [longitude, setLongitude] = useState(null);
   const [images, setImages] = useState([]);
   const [imagePreviews, setImagePreviews] = useState([]);
+  const [isDragging, setIsDragging] = useState(false);
 
   // AI Live Classification State
   const [aiResult, setAiResult] = useState(null);
@@ -49,9 +51,8 @@ const SubmitComplaint = () => {
     }
   };
 
-  // Image upload handling
-  const handleImageChange = (e) => {
-    const selectedFiles = Array.from(e.target.files);
+  // Process files
+  const processFiles = (selectedFiles) => {
     if (selectedFiles.length + images.length > 4) {
       showError("You can upload a maximum of 4 image attachments.");
       return;
@@ -62,6 +63,36 @@ const SubmitComplaint = () => {
 
     const previews = newImages.map((file) => URL.createObjectURL(file));
     setImagePreviews(previews);
+  };
+
+  // Image upload handling
+  const handleImageChange = (e) => {
+    const selectedFiles = Array.from(e.target.files);
+    processFiles(selectedFiles);
+  };
+
+  // Drag & drop handlers
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      const droppedFiles = Array.from(e.dataTransfer.files).filter((file) => file.type.startsWith('image/'));
+      if (droppedFiles.length > 0) {
+        processFiles(droppedFiles);
+      } else {
+        showError("Please upload valid image files only.");
+      }
+    }
   };
 
   const removeImage = (index) => {
@@ -109,30 +140,23 @@ const SubmitComplaint = () => {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 12 }}
+      initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-      className="max-w-4xl mx-auto space-y-8"
+      transition={{ duration: 0.25 }}
+      className="space-y-6"
     >
-      <div>
-        <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 font-bold text-xs uppercase tracking-wider mb-1">
-          <Sparkles className="w-4 h-4 text-amber-500" />
-          AI Auto-Routed Grievance Filing
-        </div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">
-          Submit Citizen Complaint
-        </h1>
-        <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
-          Describe your civic issue below. Gemini AI automatically determines category, priority, and assigns the responsible officer.
-        </p>
-      </div>
+      <PageHeader
+        title="Submit Citizen Complaint"
+        subtitle="Describe your civic issue. Gemini AI auto-classifies category, priority, and assigns the responsible department officer."
+        breadcrumbs={[{ label: 'Submit Complaint' }]}
+      />
 
-      <div className="grid md:grid-cols-3 gap-8">
-        
+      <div className="grid md:grid-cols-3 gap-6">
+
         {/* Form Column */}
         <form onSubmit={handleSubmit} className="md:col-span-2 space-y-6">
           <Card hoverEffect={false} className="p-6 sm:p-8 space-y-6">
-            
+
             {/* Complaint Title */}
             <FormInput
               label="Complaint Subject / Title"
@@ -190,39 +214,51 @@ const SubmitComplaint = () => {
               />
             </div>
 
-            {/* Photo Attachments */}
+            {/* Photo Attachments with Drag & Drop */}
             <div>
               <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
                 Attach Proof Photographs (Max 4)
               </label>
-              
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                {imagePreviews.map((src, idx) => (
-                  <div key={idx} className="relative group rounded-xl overflow-hidden aspect-square border border-slate-200 dark:border-slate-700">
-                    <img src={src} alt="Preview" className="w-full h-full object-cover" />
-                    <button
-                      type="button"
-                      onClick={() => removeImage(idx)}
-                      className="absolute top-1 right-1 bg-rose-600 text-white p-1 rounded-full opacity-80 group-hover:opacity-100 transition-opacity"
-                    >
-                      <X className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                ))}
 
-                {imagePreviews.length < 4 && (
-                  <label className="flex flex-col items-center justify-center p-4 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-xl cursor-pointer hover:border-blue-500 hover:bg-blue-50/30 dark:hover:bg-slate-800/40 transition-all aspect-square">
-                    <Upload className="w-5 h-5 text-slate-400 mb-1" />
-                    <span className="text-[11px] font-semibold text-slate-500">Upload Photo</span>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      multiple
-                      onChange={handleImageChange}
-                      className="hidden"
-                    />
-                  </label>
-                )}
+              <div
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+                className={`p-4 border-2 border-dashed rounded-2xl transition-all ${isDragging
+                    ? 'border-blue-500 bg-blue-50/50 dark:bg-blue-950/40'
+                    : 'border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/40'
+                  }`}
+              >
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  {imagePreviews.map((src, idx) => (
+                    <div key={idx} className="relative group rounded-xl overflow-hidden aspect-square border border-slate-200 dark:border-slate-700 shadow-xs">
+                      <img src={src} alt="Preview" className="w-full h-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => removeImage(idx)}
+                        className="absolute top-1 right-1 bg-rose-600 text-white p-1 rounded-full opacity-80 group-hover:opacity-100 transition-opacity"
+                        aria-label="Remove image"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ))}
+
+                  {imagePreviews.length < 4 && (
+                    <label className="flex flex-col items-center justify-center p-3 border border-slate-200 dark:border-slate-700 rounded-xl cursor-pointer hover:border-blue-500 hover:bg-white dark:hover:bg-slate-800 transition-all aspect-square text-center">
+                      <Upload className="w-5 h-5 text-blue-600 dark:text-blue-400 mb-1" />
+                      <span className="text-[11px] font-bold text-slate-700 dark:text-slate-200">Drag & Drop</span>
+                      <span className="text-[9px] text-slate-400">or browse photo</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        onChange={handleImageChange}
+                        className="hidden"
+                      />
+                    </label>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -232,16 +268,16 @@ const SubmitComplaint = () => {
               variant="primary"
               loading={submitting}
               icon={Send}
-              className="w-full py-3.5 text-base"
+              className="w-full py-3.5 text-base shadow-md shadow-blue-500/20"
             >
-              Submit & Route Ticket
+              Submit & Route Complaint
             </Button>
           </Card>
         </form>
 
         {/* Right AI Preview Panel */}
         <div className="space-y-6">
-          <div className="bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950 text-white p-6 rounded-3xl shadow-xl border border-slate-800 space-y-5">
+          <div className="bg-slate-900 text-white p-6 rounded-3xl shadow-floating border border-slate-800 space-y-5">
             <div className="flex items-center gap-2.5 pb-4 border-b border-white/10">
               <div className="p-2 bg-blue-500/20 text-blue-400 rounded-xl">
                 <Sparkles className="w-5 h-5 text-amber-400" />

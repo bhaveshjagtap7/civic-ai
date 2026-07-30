@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { useToast } from '../../components/common/Toast';
 import { Sparkles, MapPin, Building2, Clock, CheckCircle2, Star, Send, ArrowLeft } from 'lucide-react';
 import api from '../../services/api';
+import PageHeader from '../../components/layout/PageHeader';
 import SkeletonLoader from '../../components/common/SkeletonLoader';
 import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
@@ -65,35 +66,35 @@ const ComplaintDetails = () => {
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="max-w-5xl mx-auto space-y-6"
+      className="space-y-6"
     >
       {/* Back Link */}
-      <Link to="/complaints" className="inline-flex items-center gap-2 text-xs font-bold text-slate-500 hover:text-blue-600 dark:text-slate-400">
-        <ArrowLeft className="w-4 h-4" /> Back to History
+      <Link to="/complaints" className="inline-flex items-center gap-2 text-xs font-bold text-[#6B7280] hover:text-[#2563EB] transition-colors">
+        <ArrowLeft className="w-4 h-4" /> Back to Complaint History
       </Link>
 
       {/* Header Info Banner */}
       <Card hoverEffect={false} className="p-6 sm:p-8 space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <span className="text-sm font-extrabold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 px-3 py-1.5 rounded-xl border border-blue-200 dark:border-blue-800">
+            <span className="text-sm font-extrabold text-[#2563EB] bg-blue-50 px-3 py-1.5 rounded-xl border border-blue-200">
               #{complaint.complaint_number}
             </span>
             <Badge variant={complaint.status}>{complaint.status}</Badge>
             <Badge variant={complaint.priority}>{complaint.priority} Priority</Badge>
           </div>
 
-          <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+          <div className="flex items-center gap-2 text-xs text-slate-500">
             <Clock className="w-4 h-4 text-slate-400" />
             <span>Filed on {new Date(complaint.created_at).toLocaleDateString()}</span>
           </div>
         </div>
 
-        <h1 className="text-2xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight leading-tight">
+        <h1 className="text-2xl font-extrabold text-[#111827] tracking-tight leading-tight">
           {complaint.title}
         </h1>
 
-        <div className="flex flex-wrap gap-4 text-xs text-slate-600 dark:text-slate-300 pt-3 border-t border-slate-100 dark:border-slate-800">
+        <div className="flex flex-wrap gap-4 text-xs text-slate-600 pt-3 border-t border-slate-100">
           <div className="flex items-center gap-1.5">
             <Building2 className="w-4 h-4 text-blue-600" />
             <span className="font-semibold">{complaint.department_name || 'General Services'}</span>
