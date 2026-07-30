@@ -3,7 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { ToastProvider } from './components/common/Toast';
 import ProtectedRoute from './components/common/ProtectedRoute';
-import MainLayout from './components/layout/MainLayout';
+import AppLayout from './components/layout/AppLayout';
 
 // Auth Pages
 import Login from './pages/auth/Login';
@@ -39,12 +39,13 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
 
-            {/* Guarded App Routes inside MainLayout */}
+            {/* Single Common Guarded AppLayout for ALL Panels */}
             <Route element={<ProtectedRoute />}>
-              <Route element={<MainLayout />}>
+              <Route element={<AppLayout />}>
                 
                 {/* Citizen Routes */}
                 <Route path="/" element={<CitizenDashboard />} />
+                <Route path="/dashboard" element={<CitizenDashboard />} />
                 <Route path="/submit-complaint" element={<SubmitComplaint />} />
                 <Route path="/complaints" element={<ComplaintHistory />} />
                 <Route path="/complaints/:id" element={<ComplaintDetails />} />
