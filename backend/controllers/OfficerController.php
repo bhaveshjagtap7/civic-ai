@@ -15,29 +15,45 @@ class OfficerController {
     // Get Officer Dashboard Summary & Assigned Tasks
     public function dashboard() {
         $officer = AuthMiddleware::requireRole(['Officer', 'Admin']);
-        $deptId = $officer['department_id'];
+        $deptId = $officer['department_id'] ? intval($officer['department_id']) : null;
 
-        $whereDept = $deptId ? "WHERE department_id = {$deptId}" : "";
-        $whereDeptAnd = $deptId ? "WHERE c.department_id = {$deptId}" : "";
+        $params = [];
+        $whereDept = "";
+        $whereDeptAnd = "";
+
+        if ($deptId) {
+            $whereDept = "WHERE department_id = ?";
+            $whereDeptAnd = "WHERE c.department_id = ?";
+            $params[] = $deptId;
+        }
 
         // Stat 1: Assigned Complaints
-        $stmt = $this->db->query("SELECT COUNT(*) as total FROM complaints {$whereDept}");
+        $stmt = $this->db->prepare("SELECT COUNT(*) as total FROM complaints {$whereDept}");
+        $stmt->execute($params);
         $totalAssigned = $stmt->fetch()['total'];
 
         // Stat 2: In Progress
-        $stmt = $this->db->query("SELECT COUNT(*) as total FROM complaints " . ($whereDept ? "{$whereDept} AND status = 'In Progress'" : "WHERE status = 'In Progress'"));
+        $sql2 = "SELECT COUNT(*) as total FROM complaints " . ($whereDept ? "{$whereDept} AND status = 'In Progress'" : "WHERE status = 'In Progress'");
+        $stmt = $this->db->prepare($sql2);
+        $stmt->execute($params);
         $inProgress = $stmt->fetch()['total'];
 
         // Stat 3: Resolved
-        $stmt = $this->db->query("SELECT COUNT(*) as total FROM complaints " . ($whereDept ? "{$whereDept} AND status = 'Resolved'" : "WHERE status = 'Resolved'"));
+        $sql3 = "SELECT COUNT(*) as total FROM complaints " . ($whereDept ? "{$whereDept} AND status = 'Resolved'" : "WHERE status = 'Resolved'");
+        $stmt = $this->db->prepare($sql3);
+        $stmt->execute($params);
         $resolved = $stmt->fetch()['total'];
 
         // Stat 4: Pending / Action Required
-        $stmt = $this->db->query("SELECT COUNT(*) as total FROM complaints " . ($whereDept ? "{$whereDept} AND status IN ('Submitted', 'Assigned')" : "WHERE status IN ('Submitted', 'Assigned')"));
+        $sql4 = "SELECT COUNT(*) as total FROM complaints " . ($whereDept ? "{$whereDept} AND status IN ('Submitted', 'Assigned')" : "WHERE status IN ('Submitted', 'Assigned')");
+        $stmt = $this->db->prepare($sql4);
+        $stmt->execute($params);
         $pendingAction = $stmt->fetch()['total'];
 
         // Stat 5: High / Critical Priority Alerts Count
-        $stmt = $this->db->query("SELECT COUNT(*) as total FROM complaints " . ($whereDept ? "{$whereDept} AND priority IN ('High', 'Critical') AND status != 'Resolved'" : "WHERE priority IN ('High', 'Critical') AND status != 'Resolved'"));
+        $sql5 = "SELECT COUNT(*) as total FROM complaints " . ($whereDept ? "{$whereDept} AND priority IN ('High', 'Critical') AND status != 'Resolved'" : "WHERE priority IN ('High', 'Critical') AND status != 'Resolved'");
+        $stmt = $this->db->prepare($sql5);
+        $stmt->execute($params);
         $highPriorityAlerts = $stmt->fetch()['total'];
 
         // Department Resolution Performance %
@@ -53,7 +69,9 @@ class OfficerController {
             ORDER BY l.created_at DESC
             LIMIT 6
         ";
-        $timelineActivities = $this->db->query($sqlLogs)->fetchAll();
+        $stmt = $this->db->prepare($sqlLogs);
+        $stmt->execute($params);
+        $timelineActivities = $stmt->fetchAll();
 
         // Recent Assigned Complaints
         $sql = "
@@ -64,7 +82,9 @@ class OfficerController {
             ORDER BY FIELD(c.priority, 'Critical', 'High', 'Medium', 'Low'), c.created_at DESC
             LIMIT 10
         ";
-        $recentComplaints = $this->db->query($sql)->fetchAll();
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($params);
+        $recentComplaints = $stmt->fetchAll();
 
         Response::success([
             'metrics' => [

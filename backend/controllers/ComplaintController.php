@@ -120,7 +120,10 @@ class ComplaintController {
                     $error = is_array($files['error']) ? $files['error'][$i] : $files['error'];
 
                     if ($error === UPLOAD_ERR_OK && !empty($tmpName)) {
-                        $ext = pathinfo($fileName, PATHINFO_EXTENSION);
+                        $ext = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+                        $allowedExts = ['jpg', 'jpeg', 'png', 'webp'];
+                        if (!in_array($ext, $allowedExts)) continue;
+
                         $uniqueName = 'cmp_' . $complaintId . '_' . time() . '_' . $i . '.' . $ext;
                         $targetPath = $uploadDir . $uniqueName;
 
@@ -364,10 +367,13 @@ class ComplaintController {
             if (!file_exists($uploadDir)) {
                 mkdir($uploadDir, 0777, true);
             }
-            $ext = pathinfo($_FILES['resolution_image']['name'], PATHINFO_EXTENSION);
-            $uniqueName = 'res_' . $id . '_' . time() . '.' . $ext;
-            if (move_uploaded_file($_FILES['resolution_image']['tmp_name'], $uploadDir . $uniqueName)) {
-                $resolutionImagePath = 'uploads/resolutions/' . $uniqueName;
+            $ext = strtolower(pathinfo($_FILES['resolution_image']['name'], PATHINFO_EXTENSION));
+            $allowedExts = ['jpg', 'jpeg', 'png', 'webp'];
+            if (in_array($ext, $allowedExts)) {
+                $uniqueName = 'res_' . $id . '_' . time() . '.' . $ext;
+                if (move_uploaded_file($_FILES['resolution_image']['tmp_name'], $uploadDir . $uniqueName)) {
+                    $resolutionImagePath = 'uploads/resolutions/' . $uniqueName;
+                }
             }
         }
 

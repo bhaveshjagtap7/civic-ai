@@ -85,6 +85,7 @@ export const DataTable = ({
               <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
                 type="text"
+                aria-label="Search data records"
                 placeholder={searchPlaceholder}
                 value={searchTerm}
                 onChange={(e) => {
@@ -102,6 +103,7 @@ export const DataTable = ({
               {filterOptions.map((f) => (
                 <select
                   key={f.key}
+                  aria-label={`Filter by ${f.label}`}
                   value={filters[f.key] || 'all'}
                   onChange={(e) => handleFilterChange(f.key, e.target.value)}
                   className="px-3 py-2 bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 rounded-xl text-xs font-medium text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
@@ -122,12 +124,13 @@ export const DataTable = ({
       {/* Table Container */}
       <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl overflow-hidden shadow-xs">
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse text-xs">
+          <table className="w-full text-left border-collapse text-xs" aria-label="Data Table">
             <thead>
               <tr className="bg-slate-50/80 dark:bg-slate-800/50 border-b border-slate-200/80 dark:border-slate-800 text-slate-500 dark:text-slate-400 font-bold uppercase text-[10px] tracking-wider">
                 {columns.map((col) => (
                   <th
                     key={col.key || col.header}
+                    scope="col"
                     onClick={() => col.sortable && handleSort(col.key)}
                     className={`py-3.5 px-4 ${col.align === 'center' ? 'text-center' : col.align === 'right' ? 'text-right' : ''} ${
                       col.sortable ? 'cursor-pointer select-none hover:text-slate-900 dark:hover:text-slate-100' : ''
@@ -183,6 +186,7 @@ export const DataTable = ({
             </span>
             <div className="flex items-center gap-1.5">
               <button
+                aria-label="Previous Page"
                 onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
                 disabled={currentPage === 1}
                 className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 disabled:opacity-40 hover:bg-white dark:hover:bg-slate-800"
@@ -193,6 +197,7 @@ export const DataTable = ({
                 {currentPage} / {totalPages}
               </span>
               <button
+                aria-label="Next Page"
                 onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
                 disabled={currentPage === totalPages}
                 className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 disabled:opacity-40 hover:bg-white dark:hover:bg-slate-800"
