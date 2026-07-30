@@ -8,7 +8,7 @@ export default defineConfig({
     port: 3000,
     proxy: {
       '/api': {
-        target: 'http://localhost/civic%20ai/backend',
+        target: 'http://localhost/civic-ai/backend',
         changeOrigin: true,
         secure: false,
       }
