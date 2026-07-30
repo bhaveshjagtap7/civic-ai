@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useToast } from '../../components/common/Toast';
-import { Sparkles, MapPin, Building2, User, Clock, CheckCircle2, Star, Shield, Image, Send, ArrowLeft } from 'lucide-react';
+import { Sparkles, MapPin, Building2, Clock, CheckCircle2, Star, Send, ArrowLeft } from 'lucide-react';
 import api from '../../services/api';
 import SkeletonLoader from '../../components/common/SkeletonLoader';
+import Card from '../../components/ui/Card';
+import Badge from '../../components/ui/Badge';
+import Button from '../../components/ui/Button';
+import { motion } from 'framer-motion';
 
 const ComplaintDetails = () => {
   const { id } = useParams();
@@ -54,40 +58,29 @@ const ComplaintDetails = () => {
   };
 
   if (loading) return <SkeletonLoader count={3} type="card" />;
-  if (!complaint) return <div className="p-8 text-center font-bold">Complaint not found.</div>;
-
-  const getStatusBadge = (status) => {
-    switch (status) {
-      case 'Resolved':
-        return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800';
-      case 'In Progress':
-        return 'bg-brand-100 text-brand-800 dark:bg-brand-900/40 dark:text-brand-300 border-brand-200 dark:border-brand-800';
-      case 'Assigned':
-        return 'bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300 border-purple-200 dark:border-purple-800';
-      case 'Rejected':
-        return 'bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-300 border-rose-200 dark:border-rose-800';
-      default:
-        return 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300 border-amber-200 dark:border-amber-800';
-    }
-  };
+  if (!complaint) return <div className="p-8 text-center font-bold text-slate-500">Complaint not found.</div>;
 
   return (
-    <div className="max-w-5xl mx-auto space-y-8">
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      className="max-w-5xl mx-auto space-y-6"
+    >
       {/* Back Link */}
-      <Link to="/complaints" className="inline-flex items-center gap-2 text-xs font-bold text-slate-500 hover:text-brand-600 dark:text-slate-400">
+      <Link to="/complaints" className="inline-flex items-center gap-2 text-xs font-bold text-slate-500 hover:text-blue-600 dark:text-slate-400">
         <ArrowLeft className="w-4 h-4" /> Back to History
       </Link>
 
       {/* Header Info Banner */}
-      <div className="bg-white dark:bg-slate-800 p-6 sm:p-8 rounded-3xl border border-slate-200/80 dark:border-slate-700/60 shadow-xs space-y-4">
+      <Card hoverEffect={false} className="p-6 sm:p-8 space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <span className="text-sm font-extrabold text-brand-600 dark:text-brand-400 bg-brand-50 dark:bg-brand-950/60 px-3 py-1.5 rounded-xl border border-brand-200 dark:border-brand-800">
+            <span className="text-sm font-extrabold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 px-3 py-1.5 rounded-xl border border-blue-200 dark:border-blue-800">
               #{complaint.complaint_number}
             </span>
-            <span className={`text-xs font-bold px-3 py-1 rounded-xl border ${getStatusBadge(complaint.status)}`}>
-              {complaint.status}
-            </span>
+            <Badge variant={complaint.status}>{complaint.status}</Badge>
+            <Badge variant={complaint.priority}>{complaint.priority} Priority</Badge>
           </div>
 
           <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
@@ -96,13 +89,13 @@ const ComplaintDetails = () => {
           </div>
         </div>
 
-        <h1 className="text-2xl font-extrabold text-slate-900 dark:text-slate-100 leading-tight">
+        <h1 className="text-2xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight leading-tight">
           {complaint.title}
         </h1>
 
-        <div className="flex flex-wrap gap-4 text-xs text-slate-600 dark:text-slate-300 pt-2 border-t border-slate-100 dark:border-slate-700">
+        <div className="flex flex-wrap gap-4 text-xs text-slate-600 dark:text-slate-300 pt-3 border-t border-slate-100 dark:border-slate-800">
           <div className="flex items-center gap-1.5">
-            <Building2 className="w-4 h-4 text-brand-500" />
+            <Building2 className="w-4 h-4 text-blue-600" />
             <span className="font-semibold">{complaint.department_name || 'General Services'}</span>
           </div>
           <div className="flex items-center gap-1.5">
@@ -110,24 +103,24 @@ const ComplaintDetails = () => {
             <span>{complaint.location || 'City Central'}</span>
           </div>
         </div>
-      </div>
+      </Card>
 
       {/* Grid Content */}
-      <div className="grid md:grid-cols-3 gap-8">
+      <div className="grid md:grid-cols-3 gap-6">
         
         {/* Left 2 Cols: Details & Timeline */}
         <div className="md:col-span-2 space-y-6">
           
           {/* Description */}
-          <div className="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200/80 dark:border-slate-700/60 shadow-xs space-y-3">
-            <h3 className="font-bold text-sm uppercase tracking-wider text-slate-500 dark:text-slate-400">Issue Description</h3>
-            <p className="text-sm text-slate-700 dark:text-slate-200 leading-relaxed whitespace-pre-line">
+          <Card hoverEffect={false} className="p-6 space-y-3">
+            <h3 className="font-bold text-xs uppercase tracking-wider text-slate-400">Issue Description</h3>
+            <p className="text-sm text-slate-800 dark:text-slate-200 leading-relaxed whitespace-pre-line font-medium">
               {complaint.description}
             </p>
 
             {/* Images */}
             {complaint.images && complaint.images.length > 0 && (
-              <div className="pt-4 border-t border-slate-100 dark:border-slate-700 space-y-2">
+              <div className="pt-4 border-t border-slate-100 dark:border-slate-800 space-y-2">
                 <h4 className="text-xs font-semibold text-slate-500">Citizen Photo Evidence</h4>
                 <div className="flex flex-wrap gap-3">
                   {complaint.images.map((img, idx) => (
@@ -138,20 +131,20 @@ const ComplaintDetails = () => {
                 </div>
               </div>
             )}
-          </div>
+          </Card>
 
           {/* AI Summary & Resolution Card */}
           {complaint.ai_summary && (
-            <div className="bg-gradient-to-r from-brand-900 via-slate-900 to-indigo-950 text-white p-6 rounded-3xl shadow-lg border border-brand-800 space-y-3">
+            <div className="bg-gradient-to-r from-slate-900 via-slate-900 to-indigo-950 text-white p-6 rounded-3xl shadow-lg border border-slate-800 space-y-3">
               <div className="flex items-center gap-2">
                 <Sparkles className="w-5 h-5 text-amber-400" />
                 <h3 className="font-bold text-sm text-white">Gemini AI Executive Summary</h3>
               </div>
-              <p className="text-xs text-brand-100 leading-relaxed italic">"{complaint.ai_summary}"</p>
+              <p className="text-xs text-slate-200 leading-relaxed italic">"{complaint.ai_summary}"</p>
 
               {complaint.ai_suggested_resolution && (
                 <div className="pt-2">
-                  <span className="text-[11px] font-bold text-brand-300 uppercase block">Recommended Resolution Action</span>
+                  <span className="text-[10px] font-bold text-blue-400 uppercase block tracking-wider">Recommended Resolution Action</span>
                   <p className="text-xs text-emerald-300 mt-0.5">{complaint.ai_suggested_resolution}</p>
                 </div>
               )}
@@ -185,7 +178,7 @@ const ComplaintDetails = () => {
               {/* Citizen Feedback Form if not rated yet */}
               {!complaint.rating ? (
                 <form onSubmit={handleFeedbackSubmit} className="mt-4 pt-4 border-t border-emerald-200 dark:border-emerald-800/80 space-y-3">
-                  <h4 className="font-bold text-xs text-emerald-900 dark:text-emerald-200 uppercase">Rate Your Service Resolution</h4>
+                  <h4 className="font-bold text-xs text-emerald-900 dark:text-emerald-200 uppercase tracking-wider">Rate Your Service Resolution</h4>
                   <div className="flex items-center gap-2">
                     {[1, 2, 3, 4, 5].map((star) => (
                       <button
@@ -204,16 +197,19 @@ const ComplaintDetails = () => {
                     value={feedbackComments}
                     onChange={(e) => setFeedbackComments(e.target.value)}
                     placeholder="Write a brief review of the municipal officer's action..."
-                    className="w-full p-3 bg-white dark:bg-slate-900 border border-emerald-300 dark:border-emerald-700 rounded-xl text-xs outline-none"
+                    className="w-full p-3 bg-white dark:bg-slate-900 border border-emerald-300 dark:border-emerald-700 rounded-xl text-xs outline-none focus:ring-2 focus:ring-emerald-500/20"
                   />
 
-                  <button
+                  <Button
                     type="submit"
-                    disabled={submittingFeedback}
-                    className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs flex items-center gap-2"
+                    variant="primary"
+                    size="sm"
+                    loading={submittingFeedback}
+                    icon={Send}
+                    className="bg-emerald-600 hover:bg-emerald-700 text-white"
                   >
-                    <Send className="w-3.5 h-3.5" /> Submit Service Feedback
-                  </button>
+                    Submit Service Feedback
+                  </Button>
                 </form>
               ) : (
                 <div className="p-3 bg-white dark:bg-slate-900 rounded-xl border border-emerald-200 dark:border-emerald-800 text-xs">
@@ -225,16 +221,16 @@ const ComplaintDetails = () => {
           )}
 
           {/* Audit Log Timeline */}
-          <div className="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200/80 dark:border-slate-700/60 shadow-xs space-y-4">
-            <h3 className="font-bold text-sm uppercase tracking-wider text-slate-500 dark:text-slate-400">Audit History & Timeline</h3>
+          <Card hoverEffect={false} className="p-6 space-y-4">
+            <h3 className="font-bold text-xs uppercase tracking-wider text-slate-400">Audit History & Timeline</h3>
 
             <div className="relative border-l-2 border-slate-200 dark:border-slate-700 ml-4 space-y-6">
               {complaint.timeline && complaint.timeline.map((log) => (
                 <div key={log.id} className="relative pl-6">
-                  <div className="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-brand-600 ring-4 ring-white dark:ring-slate-800" />
+                  <div className="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-blue-600 ring-4 ring-white dark:ring-slate-900" />
                   <div className="space-y-1">
                     <p className="text-xs font-bold text-slate-900 dark:text-slate-100">
-                      Status changed to <span className="text-brand-600 dark:text-brand-400">{log.status_to}</span>
+                      Status changed to <span className="text-blue-600 dark:text-blue-400">{log.status_to}</span>
                     </p>
                     <p className="text-xs text-slate-600 dark:text-slate-300">{log.comment}</p>
                     <span className="text-[10px] text-slate-400 block">
@@ -244,39 +240,39 @@ const ComplaintDetails = () => {
                 </div>
               ))}
             </div>
-          </div>
+          </Card>
 
         </div>
 
         {/* Right Sidebar Details */}
         <div className="space-y-6">
-          <div className="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200/80 dark:border-slate-700/60 shadow-xs space-y-4 text-xs">
-            <h3 className="font-bold text-sm text-slate-900 dark:text-slate-100 border-b border-slate-100 dark:border-slate-700 pb-3">Ticket Information</h3>
+          <Card hoverEffect={false} className="p-6 space-y-4 text-xs">
+            <h3 className="font-bold text-sm text-slate-900 dark:text-slate-100 border-b border-slate-100 dark:border-slate-800 pb-3">Ticket Metadata</h3>
 
             <div>
-              <span className="text-slate-400 font-semibold block uppercase text-[10px]">Citizen Name</span>
+              <span className="text-slate-400 font-semibold block uppercase text-[10px] tracking-wider">Citizen Name</span>
               <p className="font-bold text-slate-800 dark:text-slate-200 text-sm mt-0.5">{complaint.citizen_name}</p>
             </div>
 
             <div>
-              <span className="text-slate-400 font-semibold block uppercase text-[10px]">Category & Priority</span>
+              <span className="text-slate-400 font-semibold block uppercase text-[10px] tracking-wider">Category & Priority</span>
               <p className="font-bold text-slate-800 dark:text-slate-200 mt-0.5">{complaint.category} ({complaint.priority})</p>
             </div>
 
             <div>
-              <span className="text-slate-400 font-semibold block uppercase text-[10px]">Assigned Officer</span>
+              <span className="text-slate-400 font-semibold block uppercase text-[10px] tracking-wider">Assigned Officer</span>
               <p className="font-bold text-slate-800 dark:text-slate-200 mt-0.5">{complaint.officer_name || 'Pending Officer Allocation'}</p>
             </div>
 
             <div>
-              <span className="text-slate-400 font-semibold block uppercase text-[10px]">Department Contact</span>
-              <p className="font-bold text-brand-600 dark:text-brand-400 mt-0.5">{complaint.department_name}</p>
+              <span className="text-slate-400 font-semibold block uppercase text-[10px] tracking-wider">Department Contact</span>
+              <p className="font-bold text-blue-600 dark:text-blue-400 mt-0.5">{complaint.department_name}</p>
             </div>
-          </div>
+          </Card>
         </div>
 
       </div>
-    </div>
+    </motion.div>
   );
 };
 

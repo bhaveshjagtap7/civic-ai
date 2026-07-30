@@ -18,6 +18,7 @@ class OfficerController {
         $deptId = $officer['department_id'];
 
         $whereDept = $deptId ? "WHERE department_id = {$deptId}" : "";
+        $whereDeptAnd = $deptId ? "WHERE c.department_id = {$deptId}" : "";
 
         // Stat 1: Assigned Complaints
         $stmt = $this->db->query("SELECT COUNT(*) as total FROM complaints {$whereDept}");
@@ -35,9 +36,24 @@ class OfficerController {
         $stmt = $this->db->query("SELECT COUNT(*) as total FROM complaints " . ($whereDept ? "{$whereDept} AND status IN ('Submitted', 'Assigned')" : "WHERE status IN ('Submitted', 'Assigned')"));
         $pendingAction = $stmt->fetch()['total'];
 
-        // Priority distribution for officer department
-        $stmt = $this->db->query("SELECT priority, COUNT(*) as count FROM complaints {$whereDept} GROUP BY priority");
-        $priorityCounts = $stmt->fetchAll();
+        // Stat 5: High / Critical Priority Alerts Count
+        $stmt = $this->db->query("SELECT COUNT(*) as total FROM complaints " . ($whereDept ? "{$whereDept} AND priority IN ('High', 'Critical') AND status != 'Resolved'" : "WHERE priority IN ('High', 'Critical') AND status != 'Resolved'"));
+        $highPriorityAlerts = $stmt->fetch()['total'];
+
+        // Department Resolution Performance %
+        $deptPerformance = $totalAssigned > 0 ? round(($resolved / $totalAssigned) * 100, 1) : 100;
+
+        // Recent Timeline Activities for Department
+        $sqlLogs = "
+            SELECT l.*, u.name as user_name, u.role as user_role, c.complaint_number, c.title as complaint_title
+            FROM complaint_logs l
+            JOIN complaints c ON l.complaint_id = c.id
+            LEFT JOIN users u ON l.action_by_user_id = u.id
+            {$whereDeptAnd}
+            ORDER BY l.created_at DESC
+            LIMIT 6
+        ";
+        $timelineActivities = $this->db->query($sqlLogs)->fetchAll();
 
         // Recent Assigned Complaints
         $sql = "
@@ -55,10 +71,12 @@ class OfficerController {
                 'total_assigned' => (int)$totalAssigned,
                 'in_progress' => (int)$inProgress,
                 'resolved' => (int)$resolved,
-                'pending_action' => (int)$pendingAction
+                'pending_action' => (int)$pendingAction,
+                'high_priority_alerts' => (int)$highPriorityAlerts,
+                'department_performance' => $deptPerformance
             ],
-            'priority_distribution' => $priorityCounts,
-            'recent_complaints' => $recentComplaints
+            'recent_complaints' => $recentComplaints,
+            'complaint_timeline' => $timelineActivities
         ]);
     }
 }

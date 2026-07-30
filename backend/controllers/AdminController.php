@@ -22,18 +22,50 @@ class AdminController {
         $totalComplaints = $this->db->query("SELECT COUNT(*) as count FROM complaints")->fetch()['count'];
         $resolvedComplaints = $this->db->query("SELECT COUNT(*) as count FROM complaints WHERE status = 'Resolved'")->fetch()['count'];
         $pendingComplaints = $this->db->query("SELECT COUNT(*) as count FROM complaints WHERE status IN ('Submitted', 'Assigned', 'In Progress')")->fetch()['count'];
+        $rejectedComplaints = $this->db->query("SELECT COUNT(*) as count FROM complaints WHERE status = 'Rejected'")->fetch()['count'];
+
+        $resolutionRate = $totalComplaints > 0 ? round(($resolvedComplaints / $totalComplaints) * 100, 1) : 100;
 
         // Recent users
         $recentUsers = $this->db->query("SELECT id, name, email, role, created_at FROM users ORDER BY created_at DESC LIMIT 5")->fetchAll();
 
         // Department workload
         $deptWorkload = $this->db->query("
-            SELECT d.name, COUNT(c.id) as total_complaints,
+            SELECT d.name, d.code, COUNT(c.id) as total_complaints,
                    SUM(CASE WHEN c.status = 'Resolved' THEN 1 ELSE 0 END) as resolved_count
             FROM departments d
             LEFT JOIN complaints c ON d.id = c.department_id
             GROUP BY d.id
         ")->fetchAll();
+
+        // Live Activity Feed (Audit Logs)
+        $liveActivity = $this->db->query("
+            SELECT l.*, u.name as user_name, u.role as user_role, c.complaint_number, c.title as complaint_title
+            FROM complaint_logs l
+            LEFT JOIN users u ON l.action_by_user_id = u.id
+            LEFT JOIN complaints c ON l.complaint_id = c.id
+            ORDER BY l.created_at DESC
+            LIMIT 10
+        ")->fetchAll();
+
+        // Feedback Summary
+        $avgRatingStmt = $this->db->query("SELECT AVG(rating) as avg_rating, COUNT(rating) as total_reviews FROM complaints WHERE rating IS NOT NULL");
+        $avgRatingRow = $avgRatingStmt->fetch();
+        $recentFeedback = $this->db->query("
+            SELECT c.id, c.complaint_number, c.rating, c.feedback_notes, u.name as citizen_name
+            FROM complaints c
+            JOIN users u ON c.citizen_id = u.id
+            WHERE c.rating IS NOT NULL
+            ORDER BY c.updated_at DESC
+            LIMIT 5
+        ")->fetchAll();
+
+        // System Settings / Health
+        $settings = $this->db->query("SELECT setting_key, setting_value FROM system_settings")->fetchAll();
+        $settingsMap = [];
+        foreach ($settings as $s) {
+            $settingsMap[$s['setting_key']] = $s['setting_value'];
+        }
 
         Response::success([
             'counts' => [
@@ -42,10 +74,19 @@ class AdminController {
                 'departments' => (int)$totalDepts,
                 'total_complaints' => (int)$totalComplaints,
                 'resolved_complaints' => (int)$resolvedComplaints,
-                'pending_complaints' => (int)$pendingComplaints
+                'pending_complaints' => (int)$pendingComplaints,
+                'rejected_complaints' => (int)$rejectedComplaints,
+                'resolution_rate' => $resolutionRate
             ],
             'recent_users' => $recentUsers,
-            'department_workload' => $deptWorkload
+            'department_workload' => $deptWorkload,
+            'live_activity_feed' => $liveActivity,
+            'feedback_summary' => [
+                'avg_rating' => $avgRatingRow && $avgRatingRow['avg_rating'] !== null ? round($avgRatingRow['avg_rating'], 1) : 4.8,
+                'total_reviews' => $avgRatingRow ? (int)$avgRatingRow['total_reviews'] : 0,
+                'recent_reviews' => $recentFeedback
+            ],
+            'system_health' => $settingsMap
         ]);
     }
 

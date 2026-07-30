@@ -1,9 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useToast } from '../../components/common/Toast';
-import { Sparkles, MapPin, Building2, User, Phone, Mail, Clock, CheckCircle2, Upload, Send, ArrowLeft, Shield } from 'lucide-react';
+import { Sparkles, MapPin, Mail, Phone, Upload, Send, ArrowLeft, Shield } from 'lucide-react';
 import api from '../../services/api';
 import SkeletonLoader from '../../components/common/SkeletonLoader';
+import Card from '../../components/ui/Card';
+import Badge from '../../components/ui/Badge';
+import Button from '../../components/ui/Button';
+import FormInput from '../../components/ui/FormInput';
+import { motion } from 'framer-motion';
 
 const OfficerComplaintDetails = () => {
   const { id } = useParams();
@@ -74,26 +79,29 @@ const OfficerComplaintDetails = () => {
   };
 
   if (loading) return <SkeletonLoader count={3} type="card" />;
-  if (!complaint) return <div className="p-8 text-center font-bold">Complaint not found.</div>;
+  if (!complaint) return <div className="p-8 text-center font-bold text-slate-500">Complaint not found.</div>;
 
   return (
-    <div className="max-w-5xl mx-auto space-y-8">
-      
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      className="max-w-5xl mx-auto space-y-6"
+    >
       {/* Back Link */}
       <Link to="/officer/complaints" className="inline-flex items-center gap-2 text-xs font-bold text-slate-500 hover:text-amber-600">
         <ArrowLeft className="w-4 h-4" /> Back to Officer Desk
       </Link>
 
       {/* Title Card */}
-      <div className="bg-white dark:bg-slate-800 p-6 sm:p-8 rounded-3xl border border-slate-200/80 dark:border-slate-700/60 shadow-xs space-y-4">
+      <Card hoverEffect={false} className="p-6 sm:p-8 space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <span className="text-sm font-extrabold text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/60 px-3 py-1.5 rounded-xl border border-amber-200 dark:border-amber-800">
+            <span className="text-sm font-extrabold text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/60 px-3 py-1 rounded-xl border border-amber-200 dark:border-amber-800">
               #{complaint.complaint_number}
             </span>
-            <span className="text-xs font-bold px-3 py-1 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200">
-              Current Status: {complaint.status}
-            </span>
+            <Badge variant={complaint.status}>{complaint.status}</Badge>
+            <Badge variant={complaint.priority}>{complaint.priority} Priority</Badge>
           </div>
 
           <span className="text-xs text-slate-500">
@@ -101,23 +109,23 @@ const OfficerComplaintDetails = () => {
           </span>
         </div>
 
-        <h1 className="text-2xl font-extrabold text-slate-900 dark:text-slate-100">{complaint.title}</h1>
-      </div>
+        <h1 className="text-2xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">{complaint.title}</h1>
+      </Card>
 
-      <div className="grid md:grid-cols-3 gap-8">
+      <div className="grid md:grid-cols-3 gap-6">
         
         {/* Left Column: Complaint Details & Officer Action Form */}
         <div className="md:col-span-2 space-y-6">
           
           {/* Issue Description */}
-          <div className="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200/80 dark:border-slate-700/60 shadow-xs space-y-3">
-            <h3 className="font-bold text-xs uppercase tracking-wider text-slate-500">Citizen Description</h3>
-            <p className="text-sm text-slate-700 dark:text-slate-200 leading-relaxed whitespace-pre-line">
+          <Card hoverEffect={false} className="p-6 space-y-3">
+            <h3 className="font-bold text-xs uppercase tracking-wider text-slate-400">Citizen Description</h3>
+            <p className="text-sm text-slate-800 dark:text-slate-200 leading-relaxed font-medium whitespace-pre-line">
               {complaint.description}
             </p>
 
             {complaint.images && complaint.images.length > 0 && (
-              <div className="pt-4 border-t border-slate-100 dark:border-slate-700 space-y-2">
+              <div className="pt-4 border-t border-slate-100 dark:border-slate-800 space-y-2">
                 <h4 className="text-xs font-semibold text-slate-500">Citizen Photo Attachments</h4>
                 <div className="flex flex-wrap gap-3">
                   {complaint.images.map((img, idx) => (
@@ -128,11 +136,11 @@ const OfficerComplaintDetails = () => {
                 </div>
               </div>
             )}
-          </div>
+          </Card>
 
           {/* AI Recommended Plan */}
           {complaint.ai_summary && (
-            <div className="bg-gradient-to-r from-amber-900 via-slate-900 to-amber-950 text-white p-6 rounded-3xl shadow-lg border border-amber-800 space-y-3">
+            <div className="bg-gradient-to-r from-slate-900 via-slate-900 to-indigo-950 text-white p-6 rounded-3xl shadow-lg border border-slate-800 space-y-3">
               <div className="flex items-center gap-2">
                 <Sparkles className="w-5 h-5 text-amber-400" />
                 <h3 className="font-bold text-sm text-white">Gemini AI Suggested Action Plan</h3>
@@ -142,28 +150,26 @@ const OfficerComplaintDetails = () => {
           )}
 
           {/* Officer Action Form */}
-          <form onSubmit={handleStatusUpdate} className="bg-white dark:bg-slate-800 p-6 sm:p-8 rounded-3xl border-2 border-amber-500/40 shadow-xl space-y-5">
+          <Card hoverEffect={false} className="p-6 sm:p-8 border-2 border-amber-500/40 space-y-5">
             <div className="flex items-center gap-2 text-amber-600 font-extrabold text-sm uppercase tracking-wider">
               <Shield className="w-5 h-5" /> Update Ticket Status & Resolution
             </div>
 
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-2">
-                Select New Status
-              </label>
-              <select
-                value={status}
-                onChange={(e) => setStatus(e.target.value)}
-                className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-2xl text-sm font-bold outline-none text-slate-900 dark:text-slate-100"
-              >
-                <option value="In Progress">In Progress (Field Squad Dispatched)</option>
-                <option value="Resolved">Resolved (Work Completed)</option>
-                <option value="Rejected">Rejected (Out of Municipal Jurisdiction / Duplicate)</option>
-              </select>
-            </div>
+            <FormInput
+              label="Select New Status"
+              type="select"
+              name="status"
+              value={status}
+              onChange={(e) => setStatus(e.target.value)}
+              options={[
+                { value: 'In Progress', label: 'In Progress (Field Squad Dispatched)' },
+                { value: 'Resolved', label: 'Resolved (Work Completed)' },
+                { value: 'Rejected', label: 'Rejected (Out of Municipal Jurisdiction / Duplicate)' }
+              ]}
+            />
 
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-2">
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
                 Resolution Work Notes
               </label>
               <textarea
@@ -171,13 +177,13 @@ const OfficerComplaintDetails = () => {
                 value={resolutionNotes}
                 onChange={(e) => setResolutionNotes(e.target.value)}
                 placeholder="Detail the actions taken by your field maintenance crew..."
-                className="w-full p-4 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-2xl text-sm outline-none text-slate-900 dark:text-slate-100"
+                className="w-full p-3.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/80 rounded-xl text-sm font-medium text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500/20"
               />
             </div>
 
             {/* Resolution Photo Upload */}
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-2">
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
                 Upload Resolution Proof Photo (Required for Resolved Status)
               </label>
               
@@ -185,8 +191,8 @@ const OfficerComplaintDetails = () => {
                 {imagePreview ? (
                   <img src={imagePreview} alt="Proof" className="w-32 h-24 object-cover rounded-xl border border-amber-400" />
                 ) : (
-                  <label className="flex flex-col items-center justify-center p-4 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-xl cursor-pointer hover:border-amber-500 transition-all w-48">
-                    <Upload className="w-6 h-6 text-slate-400 mb-1" />
+                  <label className="flex flex-col items-center justify-center p-4 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-xl cursor-pointer hover:border-amber-500 transition-all w-48">
+                    <Upload className="w-5 h-5 text-slate-400 mb-1" />
                     <span className="text-xs font-semibold text-slate-500">Choose Image File</span>
                     <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
                   </label>
@@ -194,61 +200,57 @@ const OfficerComplaintDetails = () => {
               </div>
             </div>
 
-            <button
+            <Button
               type="submit"
-              disabled={updating}
-              className="w-full py-3.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-2xl shadow-md transition-colors flex items-center justify-center gap-2"
+              variant="secondary"
+              loading={updating}
+              icon={Send}
+              onClick={handleStatusUpdate}
+              className="w-full py-3.5 bg-amber-600 hover:bg-amber-700 text-white"
             >
-              {updating ? (
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <>
-                  <Send className="w-5 h-5" />
-                  <span>Update Complaint Status</span>
-                </>
-              )}
-            </button>
-          </form>
+              Update Complaint Status
+            </Button>
+          </Card>
 
         </div>
 
         {/* Right Sidebar: Citizen & Location Info */}
         <div className="space-y-6">
-          <div className="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200/80 dark:border-slate-700/60 shadow-xs space-y-4 text-xs">
-            <h3 className="font-bold text-sm text-slate-900 dark:text-slate-100 border-b border-slate-100 dark:border-slate-700 pb-3">
+          <Card hoverEffect={false} className="p-6 space-y-4 text-xs">
+            <h3 className="font-bold text-sm text-slate-900 dark:text-slate-100 border-b border-slate-100 dark:border-slate-800 pb-3">
               Citizen Contact Card
             </h3>
 
             <div>
-              <span className="text-slate-400 font-semibold block uppercase text-[10px]">Complainant Name</span>
+              <span className="text-slate-400 font-semibold block uppercase text-[10px] tracking-wider">Complainant Name</span>
               <p className="font-bold text-slate-800 dark:text-slate-200 text-sm mt-0.5">{complaint.citizen_name}</p>
             </div>
 
             <div>
-              <span className="text-slate-400 font-semibold block uppercase text-[10px]">Phone Number</span>
-              <p className="font-bold text-brand-600 dark:text-brand-400 mt-0.5 flex items-center gap-1">
+              <span className="text-slate-400 font-semibold block uppercase text-[10px] tracking-wider">Phone Number</span>
+              <p className="font-bold text-blue-600 dark:text-blue-400 mt-0.5 flex items-center gap-1">
                 <Phone className="w-3.5 h-3.5" /> {complaint.citizen_phone || 'Not provided'}
               </p>
             </div>
 
             <div>
-              <span className="text-slate-400 font-semibold block uppercase text-[10px]">Email Address</span>
+              <span className="text-slate-400 font-semibold block uppercase text-[10px] tracking-wider">Email Address</span>
               <p className="font-bold text-slate-800 dark:text-slate-200 mt-0.5 flex items-center gap-1">
                 <Mail className="w-3.5 h-3.5" /> {complaint.citizen_email}
               </p>
             </div>
 
             <div>
-              <span className="text-slate-400 font-semibold block uppercase text-[10px]">Location Landmark</span>
+              <span className="text-slate-400 font-semibold block uppercase text-[10px] tracking-wider">Location Landmark</span>
               <p className="font-bold text-slate-800 dark:text-slate-200 mt-0.5 flex items-center gap-1">
                 <MapPin className="w-3.5 h-3.5 text-slate-400" /> {complaint.location}
               </p>
             </div>
-          </div>
+          </Card>
         </div>
 
       </div>
-    </div>
+    </motion.div>
   );
 };
 

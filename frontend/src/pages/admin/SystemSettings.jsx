@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useToast } from '../../components/common/Toast';
-import { Settings, Save, Shield, Sparkles, Clock, Globe } from 'lucide-react';
+import { Save, Sparkles, Clock, Globe } from 'lucide-react';
 import api from '../../services/api';
 import SkeletonLoader from '../../components/common/SkeletonLoader';
+import Card from '../../components/ui/Card';
+import FormInput from '../../components/ui/FormInput';
+import Button from '../../components/ui/Button';
+import { motion } from 'framer-motion';
 
 const SystemSettings = () => {
   const [settings, setSettings] = useState({
@@ -56,119 +60,111 @@ const SystemSettings = () => {
   if (loading) return <SkeletonLoader count={3} type="card" />;
 
   return (
-    <div className="max-w-3xl mx-auto space-y-8">
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      className="max-w-3xl mx-auto space-y-6"
+    >
       <div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-slate-100">
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">
           System Settings & AI Controls
         </h1>
-        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+        <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
           Configure Gemini AI auto-routing algorithms, SLA resolution thresholds, and global parameters
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="bg-white dark:bg-slate-800 p-6 sm:p-8 rounded-3xl border border-slate-200/80 dark:border-slate-700/60 shadow-xs space-y-6">
-        
-        {/* Branding */}
-        <div className="space-y-4 pb-6 border-b border-slate-100 dark:border-slate-700">
-          <div className="flex items-center gap-2 text-brand-600 font-bold text-sm">
-            <Globe className="w-5 h-5" /> Platform Branding
-          </div>
+      <Card hoverEffect={false} className="p-6 sm:p-8 space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          
+          {/* Branding */}
+          <div className="space-y-4 pb-6 border-b border-slate-100 dark:border-slate-800">
+            <div className="flex items-center gap-2 text-blue-600 font-bold text-sm">
+              <Globe className="w-5 h-5" /> Platform Branding
+            </div>
 
-          <div>
-            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Platform Name</label>
-            <input
+            <FormInput
+              label="Platform Title / Heading"
               type="text"
+              name="app_name"
               value={settings.app_name}
               onChange={(e) => setSettings({ ...settings, app_name: e.target.value })}
-              className="w-full p-3 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-sm outline-none"
             />
           </div>
-        </div>
 
-        {/* AI Integration Config */}
-        <div className="space-y-4 pb-6 border-b border-slate-100 dark:border-slate-700">
-          <div className="flex items-center gap-2 text-amber-500 font-bold text-sm">
-            <Sparkles className="w-5 h-5" /> Gemini AI Integration Engine
-          </div>
+          {/* AI Integration Config */}
+          <div className="space-y-4 pb-6 border-b border-slate-100 dark:border-slate-800">
+            <div className="flex items-center gap-2 text-amber-500 font-bold text-sm">
+              <Sparkles className="w-5 h-5" /> Gemini AI Integration Engine
+            </div>
 
-          <div>
-            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Automated Department Routing</label>
-            <select
+            <FormInput
+              label="Automated Department Routing"
+              type="select"
+              name="ai_auto_routing"
               value={settings.ai_auto_routing}
               onChange={(e) => setSettings({ ...settings, ai_auto_routing: e.target.value })}
-              className="w-full p-3 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-sm font-bold outline-none"
-            >
-              <option value="enabled">Enabled (Auto-assign complaints via Gemini AI NLP)</option>
-              <option value="disabled">Disabled (Manual Admin Queue Assignment)</option>
-            </select>
-          </div>
-        </div>
-
-        {/* SLA Hours */}
-        <div className="space-y-4">
-          <div className="flex items-center gap-2 text-purple-600 font-bold text-sm">
-            <Clock className="w-5 h-5" /> Resolution SLA Hours Thresholds
+              options={[
+                { value: 'enabled', label: 'Enabled (Auto-assign complaints via Gemini AI NLP)' },
+                { value: 'disabled', label: 'Disabled (Manual Admin Queue Assignment)' }
+              ]}
+            />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Critical Priority SLA (Hours)</label>
-              <input
+          {/* SLA Hours */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 text-indigo-600 font-bold text-sm">
+              <Clock className="w-5 h-5" /> Resolution SLA Hours Thresholds
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <FormInput
+                label="Critical Priority SLA (Hours)"
                 type="number"
+                name="sla_critical_hours"
                 value={settings.sla_critical_hours}
                 onChange={(e) => setSettings({ ...settings, sla_critical_hours: e.target.value })}
-                className="w-full p-3 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-sm outline-none font-bold text-rose-600"
               />
-            </div>
 
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">High Priority SLA (Hours)</label>
-              <input
+              <FormInput
+                label="High Priority SLA (Hours)"
                 type="number"
+                name="sla_high_hours"
                 value={settings.sla_high_hours}
                 onChange={(e) => setSettings({ ...settings, sla_high_hours: e.target.value })}
-                className="w-full p-3 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-sm outline-none font-bold text-rose-500"
               />
-            </div>
 
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Medium Priority SLA (Hours)</label>
-              <input
+              <FormInput
+                label="Medium Priority SLA (Hours)"
                 type="number"
+                name="sla_medium_hours"
                 value={settings.sla_medium_hours}
                 onChange={(e) => setSettings({ ...settings, sla_medium_hours: e.target.value })}
-                className="w-full p-3 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-sm outline-none font-bold text-amber-500"
               />
-            </div>
 
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Low Priority SLA (Hours)</label>
-              <input
+              <FormInput
+                label="Low Priority SLA (Hours)"
                 type="number"
+                name="sla_low_hours"
                 value={settings.sla_low_hours}
                 onChange={(e) => setSettings({ ...settings, sla_low_hours: e.target.value })}
-                className="w-full p-3 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-sm outline-none font-bold text-slate-600"
               />
             </div>
           </div>
-        </div>
 
-        <button
-          type="submit"
-          disabled={saving}
-          className="w-full py-3.5 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-2xl shadow-md transition-colors flex items-center justify-center gap-2"
-        >
-          {saving ? (
-            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-          ) : (
-            <>
-              <Save className="w-5 h-5" />
-              <span>Save System Settings</span>
-            </>
-          )}
-        </button>
-      </form>
-    </div>
+          <Button
+            type="submit"
+            variant="primary"
+            loading={saving}
+            icon={Save}
+            className="w-full py-3.5 mt-4"
+          >
+            Save System Settings
+          </Button>
+        </form>
+      </Card>
+    </motion.div>
   );
 };
 
