@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useToast } from '../../components/common/Toast';
 import { Save, Sparkles, Clock, Globe } from 'lucide-react';
 import api from '../../services/api';
+import PageHeader from '../../components/layout/PageHeader';
 import SkeletonLoader from '../../components/common/SkeletonLoader';
 import Card from '../../components/ui/Card';
 import FormInput from '../../components/ui/FormInput';
@@ -64,22 +65,19 @@ const SystemSettings = () => {
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="max-w-3xl mx-auto space-y-6"
+      className="space-y-6"
     >
-      <div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">
-          System Settings & AI Controls
-        </h1>
-        <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
-          Configure Gemini AI auto-routing algorithms, SLA resolution thresholds, and global parameters
-        </p>
-      </div>
+      <PageHeader
+        title="System Settings & AI Controls"
+        subtitle="Configure Gemini AI auto-routing algorithms, SLA resolution thresholds, and global platform parameters."
+        breadcrumbs={[{ label: 'Admin', link: '/admin' }, { label: 'Settings' }]}
+      />
 
       <Card hoverEffect={false} className="p-6 sm:p-8 space-y-6">
         <form onSubmit={handleSubmit} className="space-y-6">
           
           {/* Branding */}
-          <div className="space-y-4 pb-6 border-b border-slate-100 dark:border-slate-800">
+          <div className="space-y-4 pb-6 border-b border-[#E5E7EB]">
             <div className="flex items-center gap-2 text-blue-600 font-bold text-sm">
               <Globe className="w-5 h-5" /> Platform Branding
             </div>
@@ -94,7 +92,7 @@ const SystemSettings = () => {
           </div>
 
           {/* AI Integration Config */}
-          <div className="space-y-4 pb-6 border-b border-slate-100 dark:border-slate-800">
+          <div className="space-y-4 pb-6 border-b border-[#E5E7EB]">
             <div className="flex items-center gap-2 text-amber-500 font-bold text-sm">
               <Sparkles className="w-5 h-5" /> Gemini AI Integration Engine
             </div>

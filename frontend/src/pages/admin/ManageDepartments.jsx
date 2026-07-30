@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useToast } from '../../components/common/Toast';
 import { Building2, Plus, X } from 'lucide-react';
 import api from '../../services/api';
+import PageHeader from '../../components/layout/PageHeader';
 import SkeletonLoader from '../../components/common/SkeletonLoader';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
@@ -64,27 +65,18 @@ const ManageDepartments = () => {
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="space-y-6 max-w-7xl mx-auto"
+      className="space-y-6"
     >
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">
-            Municipal Departments
-          </h1>
-          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
-            Configure sector routing codes, department heads, and contact dispatching
-          </p>
-        </div>
-
-        <Button
-          variant="primary"
-          icon={Plus}
-          onClick={() => setIsModalOpen(true)}
-          className="bg-indigo-600 hover:bg-indigo-700 text-white"
-        >
-          Add Department
-        </Button>
-      </div>
+      <PageHeader
+        title="Municipal Departments"
+        subtitle="Configure sector routing codes, department heads, SLA thresholds, and contact dispatching."
+        breadcrumbs={[{ label: 'Admin', link: '/admin' }, { label: 'Departments' }]}
+        action={
+          <Button variant="primary" icon={Plus} onClick={() => setIsModalOpen(true)}>
+            Add Department
+          </Button>
+        }
+      />
 
       {loading ? (
         <SkeletonLoader count={4} type="card" />
@@ -97,7 +89,7 @@ const ManageDepartments = () => {
               className="p-6 space-y-4"
             >
               <div className="flex items-center justify-between">
-                <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold">
+                <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold">
                   <Building2 className="w-6 h-6" />
                 </div>
                 <span className="text-xs font-extrabold px-2.5 py-1 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 rounded-lg border border-indigo-200 dark:border-indigo-800">

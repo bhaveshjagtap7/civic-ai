@@ -3,6 +3,7 @@ import { useToast } from '../../components/common/Toast';
 import ConfirmationModal from '../../components/common/ConfirmationModal';
 import { UserPlus, Trash2, Edit3, X } from 'lucide-react';
 import api from '../../services/api';
+import PageHeader from '../../components/layout/PageHeader';
 import SkeletonLoader from '../../components/common/SkeletonLoader';
 import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
@@ -106,8 +107,8 @@ const ManageUsers = () => {
       sortable: true,
       render: (val, row) => (
         <div>
-          <p className="font-bold text-slate-900 dark:text-slate-100 text-xs">{val}</p>
-          <p className="text-[11px] text-slate-500">{row.email}</p>
+          <p className="font-bold text-[#111827] text-xs">{val}</p>
+          <p className="text-[11px] text-[#6B7280]">{row.email}</p>
         </div>
       ),
     },
@@ -166,27 +167,18 @@ const ManageUsers = () => {
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="space-y-6 max-w-7xl mx-auto"
+      className="space-y-6"
     >
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">
-            User & Officer Management
-          </h1>
-          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
-            Provision department officers, assign municipal sectors, and manage accounts
-          </p>
-        </div>
-
-        <Button
-          variant="secondary"
-          icon={UserPlus}
-          onClick={() => setIsCreateOpen(true)}
-          className="bg-indigo-600 hover:bg-indigo-700 text-white"
-        >
-          Provision New Officer
-        </Button>
-      </div>
+      <PageHeader
+        title="User & Officer Management"
+        subtitle="Provision department officers, assign municipal sectors, and manage system accounts."
+        breadcrumbs={[{ label: 'Admin', link: '/admin' }, { label: 'Users & Officers' }]}
+        action={
+          <Button variant="primary" icon={UserPlus} onClick={() => setIsCreateOpen(true)}>
+            Provision New Officer
+          </Button>
+        }
+      />
 
       {loading ? (
         <SkeletonLoader count={4} type="table" />

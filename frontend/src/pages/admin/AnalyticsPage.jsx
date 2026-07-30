@@ -15,6 +15,7 @@ import {
 import { Line, Bar, Doughnut } from 'react-chartjs-2';
 import { BarChart3, MapPin, TrendingUp, Clock, CheckCircle2, AlertTriangle, Shield } from 'lucide-react';
 import api from '../../services/api';
+import PageHeader from '../../components/layout/PageHeader';
 import SkeletonLoader from '../../components/common/SkeletonLoader';
 import Card from '../../components/ui/Card';
 import AnimatedCounter from '../../components/ui/AnimatedCounter';
@@ -175,29 +176,22 @@ const AnalyticsPage = () => {
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="space-y-8 max-w-7xl mx-auto"
+      className="space-y-6"
     >
-      <div>
-        <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 font-bold text-xs uppercase tracking-wider mb-1">
-          <BarChart3 className="w-4 h-4 text-blue-600" />
-          Real-Time Governance Metrics & Analytics Suite
-        </div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">
-          Analytics & Public Service Reports
-        </h1>
-        <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
-          Comprehensive performance evaluation, department SLA resolution speeds, and geographic heat maps
-        </p>
-      </div>
+      <PageHeader
+        title="Analytics & Public Service Reports"
+        subtitle="Real-time performance evaluation, department SLA resolution speeds, and geographic complaint heat maps."
+        breadcrumbs={[{ label: 'Admin', link: '/admin' }, { label: 'Analytics' }]}
+      />
 
       {/* KPI Cards Row */}
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-5">
-        <Card hoverEffect glass className="p-6 space-y-2">
-          <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Complaints</span>
-          <h3 className="text-3xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">
+        <Card hoverEffect className="p-6 space-y-2">
+          <span className="text-xs font-bold text-[#6B7280] uppercase tracking-wider">Total Complaints</span>
+          <h3 className="text-3xl font-extrabold text-[#111827] tracking-tight">
             <AnimatedCounter value={summary.total_complaints} />
           </h3>
-          <span className="text-[11px] font-semibold text-blue-600 dark:text-blue-400 flex items-center gap-1">
+          <span className="text-[11px] font-semibold text-[#2563EB] flex items-center gap-1">
             <TrendingUp className="w-3.5 h-3.5" /> Live Ingestion
           </span>
         </Card>

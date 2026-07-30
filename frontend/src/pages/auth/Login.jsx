@@ -2,7 +2,10 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../components/common/Toast';
-import { Shield, Mail, Lock, LogIn, Sparkles, CheckCircle2, ArrowRight } from 'lucide-react';
+import {
+  Shield, Mail, Lock, LogIn, Sparkles, CheckCircle2,
+  Building2, Clock, ShieldCheck, Activity, Award
+} from 'lucide-react';
 import api from '../../services/api';
 import Button from '../../components/ui/Button';
 import FormInput from '../../components/ui/FormInput';
@@ -19,31 +22,27 @@ const Login = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     if (!email || !password) {
-      showError("Please enter both email and password.");
+      showError('Please enter both email and password.');
       return;
     }
-
     setLoading(true);
     try {
       const res = await api.post('/auth/login', { email, password });
       if (res.status === 'success') {
         login(res.data.user, res.data.token);
         showSuccess(`Welcome back, ${res.data.user.name}!`);
-
-        // Redirect based on role
         if (res.data.user.role === 'Admin') navigate('/admin');
         else if (res.data.user.role === 'Officer') navigate('/officer');
         else navigate('/');
       }
     } catch (err) {
-      showError(err.message || "Invalid credentials.");
+      showError(err.message || 'Invalid credentials.');
     } finally {
       setLoading(false);
     }
   };
 
-  // Demo account quick fill helper
-  const fillDemoAccount = (role) => {
+  const fill = (role) => {
     if (role === 'Admin') {
       setEmail('admin@civicai.gov');
       setPassword('Admin123!');
@@ -57,83 +56,133 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center p-4">
-      <div className="w-full max-w-4xl grid md:grid-cols-2 rounded-3xl overflow-hidden shadow-2xl border border-slate-200/80 dark:border-slate-800 glass-card">
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 sm:p-6 lg:p-8">
+      <div className="w-full max-w-5xl bg-white border border-slate-200 rounded-2xl shadow-xl overflow-hidden grid lg:grid-cols-12">
         
-        {/* Left Hero Panel */}
-        <div className="bg-gradient-to-br from-blue-700 via-blue-800 to-indigo-900 p-8 text-white flex flex-col justify-between relative overflow-hidden">
-          <div className="relative z-10">
+        {/* Left Information Panel: Official Government SaaS Info (7 Cols) */}
+        <div className="lg:col-span-7 bg-slate-900 text-white p-8 sm:p-10 flex flex-col justify-between relative overflow-hidden">
+          
+          {/* Top Brand Header */}
+          <div className="space-y-6 relative z-10">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-white/10 backdrop-blur-md flex items-center justify-center text-white border border-white/20">
+              <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-sm flex-shrink-0">
                 <Shield className="w-6 h-6" />
               </div>
-              <span className="font-extrabold text-2xl tracking-tight">CivicAI</span>
+              <div>
+                <span className="font-extrabold text-xl tracking-tight text-white block">CivicAI</span>
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">
+                  Municipal Governance Platform
+                </span>
+              </div>
             </div>
 
-            <div className="mt-10 space-y-4">
-              <span className="text-[10px] uppercase font-bold tracking-widest px-2.5 py-1 rounded-full bg-white/10 border border-white/20 text-blue-200">
-                Government SaaS Portal
+            <div className="space-y-3 pt-2">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-bold">
+                <Building2 className="w-3.5 h-3.5" /> Official Government Digital Portal
               </span>
-              <h2 className="text-3xl font-extrabold leading-tight tracking-tight">
-                AI Powered Public Service Automation Platform
-              </h2>
-              <p className="text-blue-100/80 text-xs leading-relaxed">
-                Empowering citizens and municipal officers with intelligent complaint classification, automated department routing, real-time SLA tracking, and resolution analytics.
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight leading-snug">
+                Smart Public Grievance Automation & SLA Governance System
+              </h1>
+              <p className="text-xs sm:text-sm text-slate-300 font-normal leading-relaxed">
+                Empowering citizens and municipal departments with intelligent AI complaint classification, automatic ward routing, transparent resolution tracking, and real-time SLA analytics.
               </p>
+            </div>
+
+            {/* Platform Metrics Highlights */}
+            <div className="grid grid-cols-2 gap-3 pt-2">
+              <div className="p-3.5 rounded-xl bg-slate-800/80 border border-slate-700/80 space-y-1">
+                <div className="flex items-center gap-1.5 text-blue-400 text-xs font-bold">
+                  <Award className="w-4 h-4" /> 99.4% SLA Speed
+                </div>
+                <p className="text-[11px] text-slate-300">On-time target resolution for ward complaints</p>
+              </div>
+
+              <div className="p-3.5 rounded-xl bg-slate-800/80 border border-slate-700/80 space-y-1">
+                <div className="flex items-center gap-1.5 text-emerald-400 text-xs font-bold">
+                  <Sparkles className="w-4 h-4" /> Gemini AI Engine
+                </div>
+                <p className="text-[11px] text-slate-300">Instant NLP auto-categorization & priority tagging</p>
+              </div>
+            </div>
+
+            {/* Key Service Directives */}
+            <div className="space-y-2 pt-1 text-xs text-slate-300">
+              <div className="flex items-center gap-2.5">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                <span>Multi-modal submission: Audio, Geo-location photo upload, and text</span>
+              </div>
+              <div className="flex items-center gap-2.5">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                <span>Automated dispatching to designated ward officers & department heads</span>
+              </div>
+              <div className="flex items-center gap-2.5">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                <span>End-to-end transparent resolution timeline & citizen satisfaction feedback</span>
+              </div>
             </div>
           </div>
 
-          <div className="relative z-10 mt-8 space-y-2.5">
-            <div className="flex items-center gap-3 text-xs text-blue-100 bg-white/10 p-3 rounded-2xl backdrop-blur-md border border-white/10">
-              <Sparkles className="w-4 h-4 text-amber-300 flex-shrink-0" />
-              <span>Automated Gemini AI Complaint Classification & Dept Routing</span>
+          {/* Bottom Security Pledge */}
+          <div className="pt-6 mt-6 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400 relative z-10">
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="w-4 h-4 text-blue-400" />
+              <span>ISO 27001 Security & Audit Compliant</span>
             </div>
-            <div className="flex items-center gap-3 text-xs text-blue-100 bg-white/10 p-3 rounded-2xl backdrop-blur-md border border-white/10">
-              <CheckCircle2 className="w-4 h-4 text-emerald-300 flex-shrink-0" />
-              <span>Transparent Audit Logs & Public Service SLA Monitoring</span>
-            </div>
+            <span className="font-mono">v2.4.0-GOV</span>
           </div>
         </div>
 
-        {/* Right Form Panel */}
-        <div className="p-8 bg-white dark:bg-slate-900 flex flex-col justify-between">
-          <div>
-            <h3 className="text-2xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">Portal Login</h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Sign in with your Citizen, Officer, or Admin credentials</p>
-
-            {/* Quick Demo Accounts Helper */}
-            <div className="mt-5 p-3.5 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
-                Quick Demo Fill:
+        {/* Right Portal Single Sign-On (SSO) Form Panel (5 Cols) */}
+        <div className="lg:col-span-5 p-8 sm:p-10 flex flex-col justify-between bg-white">
+          <div className="space-y-6">
+            
+            {/* Form Header */}
+            <div>
+              <span className="text-[10px] font-extrabold uppercase tracking-widest text-blue-600 bg-blue-50 px-2.5 py-1 rounded-md border border-blue-100 inline-block mb-2">
+                Single Sign-On (SSO)
+              </span>
+              <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
+                Portal Sign In
+              </h2>
+              <p className="text-xs text-slate-500 mt-1">
+                Enter your official Citizen, Officer, or Admin credentials
               </p>
-              <div className="flex flex-wrap gap-2">
+            </div>
+
+            {/* Quick Demo Fill Accounts Selector */}
+            <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
+              <p className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500">
+                Quick Demo Profile Login:
+              </p>
+              <div className="flex flex-wrap gap-1.5">
                 <button
                   type="button"
-                  onClick={() => fillDemoAccount('Citizen')}
-                  className="text-xs px-2.5 py-1 bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300 border border-blue-200 dark:border-blue-800 rounded-lg font-semibold hover:bg-blue-100 transition-colors"
+                  onClick={() => fill('Citizen')}
+                  className="text-xs px-2.5 py-1 bg-white border border-slate-200 text-slate-700 rounded-lg font-bold hover:bg-slate-100 transition-colors shadow-xs"
                 >
-                  Citizen User
+                  Citizen
                 </button>
                 <button
                   type="button"
-                  onClick={() => fillDemoAccount('Officer')}
-                  className="text-xs px-2.5 py-1 bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300 border border-amber-200 dark:border-amber-800 rounded-lg font-semibold hover:bg-amber-100 transition-colors"
+                  onClick={() => fill('Officer')}
+                  className="text-xs px-2.5 py-1 bg-white border border-slate-200 text-slate-700 rounded-lg font-bold hover:bg-slate-100 transition-colors shadow-xs"
                 >
                   Roads Officer
                 </button>
                 <button
                   type="button"
-                  onClick={() => fillDemoAccount('Admin')}
-                  className="text-xs px-2.5 py-1 bg-purple-50 text-purple-700 dark:bg-purple-950 dark:text-purple-300 border border-purple-200 dark:border-purple-800 rounded-lg font-semibold hover:bg-purple-100 transition-colors"
+                  onClick={() => fill('Admin')}
+                  className="text-xs px-2.5 py-1 bg-white border border-slate-200 text-slate-700 rounded-lg font-bold hover:bg-slate-100 transition-colors shadow-xs"
                 >
                   System Admin
                 </button>
               </div>
             </div>
 
-            <form onSubmit={handleLogin} className="mt-6 space-y-4">
+            {/* Login Form */}
+            <form onSubmit={handleLogin} className="space-y-4">
               <FormInput
-                label="Email Address"
+                label="Official Email Address"
                 type="email"
                 name="email"
                 value={email}
@@ -159,22 +208,27 @@ const Login = () => {
                 variant="primary"
                 loading={loading}
                 icon={LogIn}
-                className="w-full py-3"
+                className="w-full h-11 text-sm font-bold mt-2"
               >
                 Sign In to Portal
               </Button>
             </form>
           </div>
 
-          <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800 text-center">
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              Don't have a citizen account?{' '}
-              <Link to="/register" className="font-bold text-blue-600 dark:text-blue-400 hover:underline">
-                Register here
+          {/* Footer Register Link & Security Audit Notice */}
+          <div className="mt-8 pt-4 border-t border-slate-100 space-y-2 text-center">
+            <p className="text-xs text-slate-500">
+              New citizen user?{' '}
+              <Link to="/register" className="font-bold text-blue-600 hover:underline">
+                Create an account
               </Link>
+            </p>
+            <p className="text-[10px] text-slate-400 font-medium">
+              Authorized municipal access only. Unauthorized login attempts are monitored and recorded.
             </p>
           </div>
         </div>
+
       </div>
     </div>
   );

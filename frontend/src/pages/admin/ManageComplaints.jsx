@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, Trash2 } from 'lucide-react';
 import api from '../../services/api';
+import PageHeader from '../../components/layout/PageHeader';
 import SkeletonLoader from '../../components/common/SkeletonLoader';
 import ConfirmationModal from '../../components/common/ConfirmationModal';
 import { useToast } from '../../components/common/Toast';
@@ -82,8 +83,8 @@ const ManageComplaints = () => {
       sortable: true,
       render: (val, row) => (
         <div>
-          <p className="font-bold text-slate-800 dark:text-slate-200">{val || 'Unassigned'}</p>
-          <p className="text-[11px] text-slate-500">{row.category}</p>
+          <p className="font-bold text-[#111827]">{val || 'Unassigned'}</p>
+          <p className="text-[11px] text-[#6B7280]">{row.category}</p>
         </div>
       ),
     },
@@ -160,16 +161,13 @@ const ManageComplaints = () => {
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="space-y-6 max-w-7xl mx-auto"
+      className="space-y-6"
     >
-      <div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">
-          Global Complaint Monitoring
-        </h1>
-        <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
-          System-wide oversight across all citizen service requests, departments, and field updates
-        </p>
-      </div>
+      <PageHeader
+        title="Global Complaint Monitoring"
+        subtitle="System-wide oversight across all citizen service requests, departments, and field resolution updates."
+        breadcrumbs={[{ label: 'Admin', link: '/admin' }, { label: 'Complaints' }]}
+      />
 
       {loading ? (
         <SkeletonLoader count={4} type="table" />
